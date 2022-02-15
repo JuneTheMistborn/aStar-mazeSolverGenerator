@@ -1,8 +1,8 @@
 """
 Author: June Christine Simmons
 2/8/22 - 2/14/22
-Python implementation of a* maze solving algorithm without external libraries
-Version 1.1
+Python implementation of a* maze solving algorithm without external libraries(matplotlib used for visual representation)
+Version 1.2
 May add possibility to move diagonally to nodes, may add ability to define indication of wall, path, start, and goal
 """
 import matplotlib.pyplot as plt
@@ -144,7 +144,8 @@ def a_star():
 
 def animation(k):  # function to animate plot
     sub_plot.clear()
-    sub_plot.imshow(mazeAnim[k], "tab20", animated=True)
+    im = sub_plot.imshow(mazeAnim[k], "tab20", animated=True)
+    return [im]
 
 
 # print(a_star())  # uncomment to print each index of node on solution path
@@ -185,7 +186,7 @@ if solution is not None:  # if there is a solution
     # for listthing in mazeAnim:
         # print(listthing)
     if animate:
-        ani = anim.FuncAnimation(figure, animation, interval=100, frames=len(mazeAnim))  # animation of plot
+        ani = anim.FuncAnimation(figure, animation, interval=100, frames=len(mazeAnim), blit=True)  # animation of plot
         if saveAni:
             ani.save("outAnimation.gif")  # save animation
         plt.show()  # show animation
