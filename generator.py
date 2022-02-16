@@ -9,14 +9,15 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 
 
-size = (100, 100)
+size = (60, 60)
 maze = []
 cellNum = 0
 visitedList = []
 mazeAnim = [[]]
 frame = 0
-animate = True
+animate = False
 saveAni = False
+mazeStr = ""
 
 
 def make_odd(integer):
@@ -113,3 +114,12 @@ if animate:
     if saveAni:
         ani.save("mazeGen.gif")
     plt.show()
+
+for y in range(len(maze)):
+    for x in maze[y]:
+        mazeStr += x
+    mazeStr += "\n"
+
+
+with open("mazeOut.txt", "w+") as file:
+    file.write(mazeStr)
