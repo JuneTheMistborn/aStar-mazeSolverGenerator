@@ -1,26 +1,34 @@
 """
 Author: June Christine Simmons
-2/14/22 - 2/15/22
+2/14/22 - 2/16/22
 Python implementation of growing tree algorithm
-Version 1.0
+Version 1.1
 """
 from random import randint
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
+import numpy as np
 
 
-size = (100, 100)
+size = (10, 40)
 maze = []
+mazeStr = ""
 cellNum = 0
 visitedList = []
-mazeAnim = [[]]
+mazeAnim = np.zeros(((size[0]*2)+1, (size[1]*2)+1), dtype=float)
+artistList = []
 frame = 0
 animate = True
 saveAni = False
 
+figure = plt.figure()  # new mpl figure
+sub_plot = figure.add_subplot(1, 1, 1)  # new plot in figure
+
 
 def make_odd(integer):
-    if integer % 2 == 0:
+    if integer % 2 == 0 and integer != 0:
+        return integer - 1
+    elif integer == 0:
         return integer + 1
     else:
         return integer
@@ -28,32 +36,32 @@ def make_odd(integer):
 
 yOdd = randint(0, (2 * size[0]))
 randomIndex = (make_odd(randint(0, (2 * size[0]))), make_odd(randint(0, (2 * size[0]))))
+prevIndex = randomIndex
 cList = [randomIndex]
 appendNum = 1
+xVal = 1
 
 for y in range(size[0]):
     maze.append([])
-    for i in range((size[0] * 2) + 1):
+    for i in range((max(size[0], size[1]) * 2) + 1):
         maze[y*2].append("x")
     maze.append([])
+    xVal = 1
     for x in range(size[1]):
         maze[appendNum].append("x")
         maze[appendNum].append("-")
+        if animate:
+            mazeAnim[appendNum, xVal] = 1
+            xVal += 2
 
     maze[appendNum].append("x")
     appendNum += 2
+
 maze.append([])
+
 for i in range((size[0] * 2) + 1):
     maze[len(maze)-1].append("x")
 
-if animate:
-    for y_val in range(len(maze)):  # for height of frame
-        mazeAnim[frame].append([])  # add new x list
-        for x_val in range(len(maze[0])):  # for length of frame
-            if maze[y_val][x_val] == "x":
-                mazeAnim[frame][y_val].append(0)
-            else:
-                mazeAnim[frame][y_val].append(1)
 
 while len(cList) > 0:
     popList = []
@@ -81,35 +89,33 @@ while len(cList) > 0:
         cList.pop(cellNum)
         continue
     randNext = randint(0, len(neighbors) - 1)
-    # print(currIndex[0], " ", neighbors[randNext][0], " ", (currIndex[0]+neighbors[randNext][0])//2)
-    # print(currIndex[1], " ", neighbors[randNext][1], " ", (currIndex[1]+neighbors[randNext][1])//2, "\n")
+    print(currIndex[0], " ", neighbors[randNext][0], " ", (currIndex[0]+neighbors[randNext][0])//2)
+    print(currIndex[1], " ", neighbors[randNext][1], " ", (currIndex[1]+neighbors[randNext][1])//2, "\n")
     maze[(currIndex[0] + neighbors[randNext][0]) // 2][(currIndex[1] + neighbors[randNext][1]) // 2] = "-"
+    if animate:
+        mazeAnim[(currIndex[0] + neighbors[randNext][0]) // 2, (currIndex[1] + neighbors[randNext][1]) // 2] = 1
+        mazeAnim[currIndex[0], currIndex[1]] = .325
+        mazeAnim[prevIndex[0], prevIndex[1]] = 1
+        prevIndex = currIndex
     cList.append(neighbors[randNext])
 
     if animate:
-        frame += 1  # increase frame (time dimension)
-        mazeAnim.append([])  # add new frame
-        for y_val in range(len(maze)):  # for height of frame
-            mazeAnim[frame].append([])  # add new x list
-            for x_val in range(len(maze[0])):  # for length of frame
-                if maze[y_val][x_val] == "x":
-                    mazeAnim[frame][y_val].append(0)
-                elif (y_val, x_val) == currIndex:
-                    mazeAnim[frame][y_val].append(.325)
-                else:
-                    mazeAnim[frame][y_val].append(1)
+        im = sub_plot.imshow(mazeAnim, "tab20", animated=True)
+        artistList.append([im])
 
+    # print("Pass number " + str(frame))
+    # frame += 1
 
-def animation(k):  # function to animate plot
-    sub_plot.clear()
-    im = sub_plot.imshow(mazeAnim[k], "tab20", animated=True)
-    return [im]
+for y in range(len(maze)):
+    for x in maze[y]:
+        mazeStr += x
+    mazeStr += "\n"
 
+with open("mazeOut.txt", "w+") as file:
+    file.write(mazeStr)
 
-figure = plt.figure()  # new mpl figure
-sub_plot = figure.add_subplot(1, 1, 1)  # new plot in figure
 if animate:
-    ani = anim.FuncAnimation(figure, animation, interval=1, frames=len(mazeAnim), blit=True)  # animation of plot
+    ani = anim.ArtistAnimation(figure, artistList, interval=50, blit=True)  # animation of plot
     if saveAni:
         ani.save("mazeGen.gif")
     plt.show()
