@@ -9,9 +9,11 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 maze = []  # nested lists maze is stored in
 animate = True  # whether to show algorithm solving problem
-saveAni = True  # whether to save animation of algorithm solving problem
+saveAni = False  # whether to save animation of algorithm solving problem
+gWeight = 1
+hWeight = 1
 
-with open("maze.txt") as file:  # read file and create maze in nested list
+with open("mazeOut.txt") as file:  # read file and create maze in nested list
     lineNum = 0
     for line in file.readlines():
         maze.append([])  # new y list
@@ -66,7 +68,7 @@ class Node:
     def calc_vals(self):  # calculate h and f values
         self.h = abs(self.index[0] - goalIndex[0]) + abs(self.index[1] - goalIndex[1])  # heuristic function,
         # absolute value of current node index - goal index
-        self.f = self.h + self.g  # value of node, h + g, lower makes node "better"
+        self.f = (self.h*hWeight) + (self.g*gWeight)  # value of node, h + g, lower makes node "better"
 
 
 # print(maze[start.index[0]][start.index[1]])  # uncomment to print value at what program thinks is start node
@@ -186,7 +188,7 @@ if solution is not None:  # if there is a solution
     # for listthing in mazeAnim:
         # print(listthing)
     if animate:
-        ani = anim.FuncAnimation(figure, animation, interval=100, frames=len(mazeAnim), blit=True)  # animation of plot
+        ani = anim.FuncAnimation(figure, animation, interval=10, frames=len(mazeAnim), blit=True)  # animation of plot
         if saveAni:
             ani.save("outAnimation.gif")  # save animation
         plt.show()  # show animation
