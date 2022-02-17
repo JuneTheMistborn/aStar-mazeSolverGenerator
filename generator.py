@@ -10,7 +10,7 @@ import matplotlib.animation as anim
 import numpy as np
 
 
-size = (10, 40)
+size = (40, 10)
 maze = []
 mazeStr = ""
 cellNum = 0
@@ -35,7 +35,7 @@ def make_odd(integer):
 
 
 yOdd = randint(0, (2 * size[0]))
-randomIndex = (make_odd(randint(0, (2 * size[0]))), make_odd(randint(0, (2 * size[0]))))
+randomIndex = (make_odd(randint(0, (2 * size[0]))), make_odd(randint(0, (2 * size[1]))))
 prevIndex = randomIndex
 cList = [randomIndex]
 appendNum = 1
@@ -43,7 +43,7 @@ xVal = 1
 
 for y in range(size[0]):
     maze.append([])
-    for i in range((max(size[0], size[1]) * 2) + 1):
+    for i in range((size[1] * 2) + 1):
         maze[y*2].append("x")
     maze.append([])
     xVal = 1
@@ -59,7 +59,7 @@ for y in range(size[0]):
 
 maze.append([])
 
-for i in range((size[0] * 2) + 1):
+for i in range((size[1] * 2) + 1):
     maze[len(maze)-1].append("x")
 
 
