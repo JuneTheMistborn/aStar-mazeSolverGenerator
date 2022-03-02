@@ -1,17 +1,25 @@
 """
 Author: June Christine Simmons
-2/8/22 - 2/14/22
-Python implementation of a* maze solving algorithm without external libraries(matplotlib used for visual representation)
-Version 1.2
+2/8/22 - 3/2/22
+Python implementation of a* maze solving algorithm without external libraries
+(matplotlib and numpy used for visual representation)
+Version 1.4
 May add possibility to move diagonally to nodes, may add ability to define indication of wall, path, start, and goal
+Need to make solving more efficient
 """
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
+import numpy as np
+import time
 maze = []  # nested lists maze is stored in
-animate = True  # whether to show algorithm solving problem
+animate = False  # whether to show algorithm solving problem
 saveAni = False  # whether to save animation of algorithm solving problem
 gWeight = 1
 hWeight = 1
+figure = plt.figure()  # new mpl figure
+sub_plot = figure.add_subplot(1, 1, 1)  # new plot in figure
+artistList = []  # list including each artist or frame of animation
+
 
 with open("mazeOut.txt") as file:  # read file and create maze in nested list
     lineNum = 0
@@ -22,14 +30,25 @@ with open("mazeOut.txt") as file:  # read file and create maze in nested list
                 maze[lineNum].append(char)  # new x val in y list
         lineNum += 1
 
-for i in range(len(maze)):  # find where goal and start in maze are
+mazeSize = (len(maze) - 1, len(maze[0]) - 1)  # index where walls of maze are (y, x)
+mazeAnim = np.zeros((len(maze), len(maze)), dtype=float)  # array containing values for colormap of maze
+
+for i in range(len(maze)):  # find where goal and start in maze are and transcribe maze to mazeAnim
     for j in range(len(maze[i])):
         if maze[i][j] == "g":  # if text is g, node is goal
             goalIndex = (i, j)
-        if maze[i][j] == "o":  # if text is o, node is start
+            mazeAnim[i, j] = .8
+        elif maze[i][j] == "o":  # if text is o, node is start
             startIndex = (i, j)
-mazeSize = (len(maze) - 1, len(maze[0]) - 1)  # index where walls of maze are (y, x)
+            mazeAnim[i, j] = .2
+        elif maze[i][j] == "x":
+            mazeAnim[i, j] = 0
+        else:
+            mazeAnim[i, j] = 1
 # print(maze)
+if animate:
+    im = sub_plot.imshow(mazeAnim, "tab20", animated=True)
+    artistList.append([im])
 
 
 class Node:
@@ -81,6 +100,7 @@ def a_star():
     lowest_f_index = 0  # index in openList of node with "best" (lowest) f value
     path = []  # to be path from start to goal node
     frame = 0
+    times = []
 
     while len(open_list) > 0:  # while there are unexamined nodes
         # if counter % 10000 == 0:  # uncomment to print lists if infinite loop
@@ -89,6 +109,7 @@ def a_star():
         # calculated from (maze area + heuristic of start node)
         lowest_f = (mazeSize[0]*mazeSize[1])+(abs(startIndex[0]-goalIndex[0])+abs(startIndex[1]-goalIndex[1]))
         open_list_index = 0  # index of current node in open_list
+        start_time_solver = time.time()
 
         for node in open_list:  # for all nodes left unexamined
             node.calc_vals()  # calculate h and f values of node
@@ -99,6 +120,8 @@ def a_star():
 
         best_node = open_list[lowest_f_index]  # node object at index of best node
         best_node.populate_adjacent()  # calculate all adjacent nodes to best node
+        if animate and len(closed_list) >= 2:
+            mazeAnim[closed_list[len(closed_list)-1].index[0], closed_list[len(closed_list)-1].index[1]] = .45
         closed_list.append(best_node)  # add the best node to closed_list
         open_list.pop(lowest_f_index)  # remove the best node from open_list
         full_list = open_list+closed_list  # both lists together, for checking if node has already been seen
@@ -109,68 +132,40 @@ def a_star():
                     break
             else:  # if loop never breaks
                 open_list.append(adjacent)  # add adjacent node to unevaluated nodes
+                if animate:
+                    mazeAnim[adjacent.index[0], adjacent.index[1]] = .6
             if adjacent.type == "g":  # if adjacent node is goal
                 parent_node = adjacent.parent  # parent of goal node (and then of parent node, etc.)
                 while parent_node.index != start.index:  # while parent node isn't the start node
                     path.append(parent_node.index)  # add index of parent node to solution list
                     parent_node = parent_node.parent  # go to node's parent
-                return path  # return solution path
+                return path, times  # return solution path
+
+        end_time_solver = time.time()
+        solve_time = end_time_solver-start_time_solver
 
         if animate:  # if animate flag is true
+            start_time_animator = time.time()
             frame += 1  # increase frame (time dimension)
-            mazeAnim.append([])  # add new frame
-            open_indices = []  # all indices of unexamined nodes
-            closed_indices = []  # all indices of examined nodes
-            for node in open_list:  # populate index lists
-                open_indices.append(node.index)
-            for node in closed_list:
-                closed_indices.append(node.index)
-            for y_val in range(len(maze)):  # for height of frame
-                mazeAnim[frame].append([])  # add new x list
-                for x_val in range(len(maze[0])):  # for length of frame
-                    if maze[y_val][x_val] == "g":  # setting node colors based on node type (rework needed)
-                        mazeAnim[frame][y_val].append(.8)
-                    elif maze[y_val][x_val] == "o":
-                        mazeAnim[frame][y_val].append(.2)
-                    elif maze[y_val][x_val] == "x":
-                        mazeAnim[frame][y_val].append(0)
-                    elif (y_val, x_val) == best_node.index:
-                        mazeAnim[frame][y_val].append(.325)
-                    elif (y_val, x_val) in open_indices:
-                        mazeAnim[frame][y_val].append(.6)
-                    elif (y_val, x_val) in closed_indices:
-                        mazeAnim[frame][y_val].append(.45)
-                    else:
-                        mazeAnim[frame][y_val].append(1)
 
+            mazeAnim[best_node.index[0], best_node.index[1]] = .325
 
-def animation(k):  # function to animate plot
-    sub_plot.clear()
-    im = sub_plot.imshow(mazeAnim[k], "tab20", animated=True)
-    return [im]
+            im2 = sub_plot.imshow(mazeAnim, "tab20", animated=True)
+            artistList.append([im2])
+            end_time_animator = time.time()
+            animate_time = end_time_animator-end_time_animator
+            solve_animate_time = end_time_animator-start_time_solver
+            times.append((solve_time, animate_time, solve_animate_time))
+        else:
+            times.append(solve_time)
 
 
 # print(a_star())  # uncomment to print each index of node on solution path
-mazeAnim = []  # list of arrays, to be animated
-figure = plt.figure()  # new mpl figure
-if animate:
-    sub_plot = figure.add_subplot(1, 1, 1)  # new plot in figure
 
-    mazeAnim.append([])
-    for y in range(len(maze)):  # for size of y-axis of maze
-        mazeAnim[0].append([])
-        for x in range(len(maze[0])):  # for size of x-axis of maze
-            if maze[y][x] == "g":  # if node is goal, mark space as golden (.1)
-                mazeAnim[0][y].append(.8)
-            elif maze[y][x] == "o":  # if node is start, mark space as green (.15)
-                mazeAnim[0][y].append(.2)
-            elif maze[y][x] == "x":  # if node is wall, mark space as dark blue (0)
-                mazeAnim[0][y].append(0)
-            else:  # if node is not special or in solution, mark space as pink (.475)
-                mazeAnim[0][y].append(1)
-
-solution = a_star()  # indexes of all nodes on solution path
+solution, timings = a_star()  # indexes of all nodes on solution path
 solutionStr = ""  # output string to print to file
+
+print(timings)
 
 if solution is not None:  # if there is a solution
     for y in range(len(maze)):  # for size of y-axis of maze
@@ -185,10 +180,8 @@ if solution is not None:  # if there is a solution
     with open("solution.txt", "w+") as outFile:  # write solution to file
         outFile.write(solutionStr)
 
-    # for listthing in mazeAnim:
-        # print(listthing)
     if animate:
-        ani = anim.FuncAnimation(figure, animation, interval=10, frames=len(mazeAnim), blit=True)  # animation of plot
+        ani = anim.ArtistAnimation(figure, artistList, interval=10, blit=True)  # animation of plot
         if saveAni:
             ani.save("outAnimation.gif")  # save animation
         plt.show()  # show animation
