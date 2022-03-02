@@ -1,7 +1,9 @@
 """
 Author: June Christine Simmons
-2/14/22 - 2/16/22
+2/14/22 - 2/17/22
 Python implementation of growing tree algorithm
+Need to comment
+May combine animated maze and maze map into one for efficiency
 Version 1.1
 """
 from random import randint
@@ -10,16 +12,17 @@ import matplotlib.animation as anim
 import numpy as np
 
 
-size = (40, 10)
+size = (60, 60)
 maze = []
 mazeStr = ""
 cellNum = 0
 visitedList = []
 mazeAnim = np.zeros(((size[0]*2)+1, (size[1]*2)+1), dtype=float)
+randomnessWeight = 50
 artistList = []
 frame = 0
 animate = True
-saveAni = False
+saveAni = True
 
 figure = plt.figure()  # new mpl figure
 sub_plot = figure.add_subplot(1, 1, 1)  # new plot in figure
@@ -62,11 +65,14 @@ maze.append([])
 for i in range((size[1] * 2) + 1):
     maze[len(maze)-1].append("x")
 
+if animate:
+    im = sub_plot.imshow(mazeAnim, "tab20", animated=True)
+    artistList.append([im])
 
 while len(cList) > 0:
     popList = []
     randOrNext = randint(1, 100)
-    if randOrNext > 25:
+    if randOrNext < randomnessWeight:
         cellNum = randint(0, len(cList) - 1)
     else:
         cellNum = len(cList) - 1
@@ -89,8 +95,8 @@ while len(cList) > 0:
         cList.pop(cellNum)
         continue
     randNext = randint(0, len(neighbors) - 1)
-    print(currIndex[0], " ", neighbors[randNext][0], " ", (currIndex[0]+neighbors[randNext][0])//2)
-    print(currIndex[1], " ", neighbors[randNext][1], " ", (currIndex[1]+neighbors[randNext][1])//2, "\n")
+    # print(currIndex[0], " ", neighbors[randNext][0], " ", (currIndex[0]+neighbors[randNext][0])//2)
+    # print(currIndex[1], " ", neighbors[randNext][1], " ", (currIndex[1]+neighbors[randNext][1])//2, "\n")
     maze[(currIndex[0] + neighbors[randNext][0]) // 2][(currIndex[1] + neighbors[randNext][1]) // 2] = "-"
     if animate:
         mazeAnim[(currIndex[0] + neighbors[randNext][0]) // 2, (currIndex[1] + neighbors[randNext][1]) // 2] = 1
@@ -115,7 +121,7 @@ with open("mazeOut.txt", "w+") as file:
     file.write(mazeStr)
 
 if animate:
-    ani = anim.ArtistAnimation(figure, artistList, interval=50, blit=True)  # animation of plot
+    ani = anim.ArtistAnimation(figure, artistList, interval=10, blit=True)  # animation of plot
     if saveAni:
-        ani.save("mazeGen.gif")
+        ani.save("mazeGen.mp4", writer="ffmpeg", fps=30)
     plt.show()
