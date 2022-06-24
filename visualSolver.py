@@ -1,16 +1,19 @@
 """
 Author: June Christine Simmons
-2/8/22 - 3/2/22
-Python implementation of a* pathfinding algorithm without external libraries
-(matplotlib and numpy used for visual representation)
-Version 1.4
-May add possibility to move diagonally to nodes, may add ability to define indication of wall, path, start, and goal
-Need to make solving more efficient
+6/23/22 - //22
+Uses my Python implementation of the a* pathfinding algorithm, with a window to input a maze and watch it be solved
+Version 1
+May add possibility to move diagonally to nodes
 """
+import tkinter as tk
+from PIL import ImageTk, Image
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import numpy as np
 import time
+
 
 maze = []  # nested lists maze is stored in
 animate = True  # whether to show algorithm solving problem
