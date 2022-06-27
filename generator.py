@@ -18,7 +18,7 @@ mazeStr = ""
 cellNum = 0
 visitedList = []
 mazeAnim = np.zeros(((size[0]*2)+1, (size[1]*2)+1), dtype=float)
-randomnessWeight = 50
+randomnessWeight = 25
 artistList = []
 frame = 0
 animate = True

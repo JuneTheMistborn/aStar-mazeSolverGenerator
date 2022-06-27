@@ -13,9 +13,10 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import numpy as np
 import time
+import solverFuncs
 
 
-maze = []  # nested lists maze is stored in
+"""maze = []  # nested lists maze is stored in
 animate = True  # whether to show algorithm solving problem
 saveAni = True  # whether to save animation of algorithm solving problem
 gWeight = .25
@@ -190,4 +191,11 @@ if solution is not None:  # if there is a solution
         plt.show()  # show animation
 
 else:
-    print("Maze has no solution.")
+    print("Maze has no solution.")"""
+
+
+maze, maze_size, goalIndex, startIndex = solverFuncs.convert_maze("maze.txt")
+solution = solverFuncs.a_star(maze, maze_size, goalIndex, startIndex)
+print(solution)
+
+solverFuncs.write_solution(solution, maze, "maze")

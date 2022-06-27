@@ -13,16 +13,16 @@ import numpy as np
 import time
 
 maze = []  # nested lists maze is stored in
-animate = True  # whether to show algorithm solving problem
-saveAni = True  # whether to save animation of algorithm solving problem
-gWeight = .25
+animate = False  # whether to show algorithm solving problem
+saveAni = False  # whether to save animation of algorithm solving problem
+gWeight = 1
 hWeight = 1
 figure = plt.figure()  # new mpl figure
 sub_plot = figure.add_subplot(1, 1, 1)  # new plot in figure
 artistList = []  # list including each artist or frame of animation
 
 
-with open("mazeOut.txt") as file:  # read file and create maze in nested list
+with open("maze.txt") as file:  # read file and create maze in nested list
     lineNum = 0
     for line in file.readlines():
         maze.append([])  # new y list
