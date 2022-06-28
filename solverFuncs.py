@@ -1,12 +1,10 @@
 class Node:
     def __init__(self, parent, index, g):  # takes parent, index g value, and type of node
-        self.g = 0 + g  # cost of moving to node
+        self.g = g  # cost of moving to node
         self.h = 0  # heuristic cost to move from this node to goal
         self.f = 0  # overall value, g+h, lower is better node
         self.parent = parent  # parent of this node
-        self.adjacentNodes = []  # all nodes adjacent to this node
         self.index = index  # index of node (y, x)
-        self.adjacentsLeft = True  # does node have adjacents
 
     def calc_vals(self, goal_index, h_weight, g_weight):  # calculate h and f values
         self.h = abs(self.index[0] - goal_index[0]) + abs(self.index[1] - goal_index[1])  # heuristic function,
@@ -34,7 +32,7 @@ def convert_maze(maze_file):
     return maze, (len(maze)-1, len(maze[0])-1), goal_index, start_index
 
 
-def a_star(maze, maze_size, goal_index, start_index, h_weight=1, g_weight=1):
+def a_star(maze, maze_size, goal_index, start_index, do_full_solution=True, h_weight=1, g_weight=1):
     open_list = [Node(None, start_index, 0)]
     open_list[0].calc_vals(goal_index, h_weight, g_weight)
     closed_list = []
@@ -60,15 +58,22 @@ def a_star(maze, maze_size, goal_index, start_index, h_weight=1, g_weight=1):
                     while parent_node.index != start_index:
                         path.append(parent_node.index)
                         parent_node = parent_node.parent
-                    return path
+                    if do_full_solution:
+                        return path
+                    else:
+                        return open_list, closed_list
 
                 if maze[new_index[0]][new_index[1]] != "x":
                     for node in open_list + closed_list:
                         if node.index == new_index:
                             break
                     else:
-                        open_list.append(Node(current_node, new_index, current_node.g+1))
+                        new_node = Node(current_node, new_index, current_node.g+1)
+                        open_list.append(new_node)
                         open_list[len(open_list)-1].calc_vals(goal_index, h_weight, g_weight)
+
+        if not do_full_solution:
+            return open_list, closed_list[len(closed_list)-1]
 
 
 def write_solution(path, maze_txt, maze_name):
